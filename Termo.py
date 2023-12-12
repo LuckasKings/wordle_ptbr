@@ -49,18 +49,6 @@ del analise['pivot']
 analise.dropna(inplace=True)
 analise = analise.sort_values('value', ascending=False)
 
-#############################################################################################
-
-# analise.sort_values('value', ascending=False, inplace=True)
-# analise = analise.head(12)
-# x = analise['variable']
-# y = analise['value']
-#
-#
-# plt.style.use('seaborn-pastel')
-# plt.bar(x, y)
-# plt.show()
-
 colorscales = px.colors.named_colorscales()
 
 app = Dash(__name__)
