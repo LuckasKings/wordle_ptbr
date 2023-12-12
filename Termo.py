@@ -88,8 +88,8 @@ fig.update_layout(
 fig.show()
 
 
-# writer = pd.ExcelWriter('termo.xlsx', engine='xlsxwriter')
-# posicao.to_excel(writer, sheet_name='Analise', index=False, header=True, startrow=0)
-# analise.to_excel(writer, index=False, sheet_name='Base', header=True, startrow=0)
-# writer.save()
-# os.startfile('termo.xlsx')
+writer = pd.ExcelWriter('termo.xlsx', engine='xlsxwriter')
+posicao.to_excel(writer, sheet_name='Analise', index=False, header=True, startrow=0)
+analise.to_excel(writer, index=False, sheet_name='Base', header=True, startrow=0)
+writer.save()
+os.startfile('termo.xlsx')
