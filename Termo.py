@@ -1,39 +1,81 @@
-# Import libraries
 import pandas as pd
 import os
 import plotly.express as px
-from dash import Dash
+import dash
+import plotly.graph_objects as go
+from dash import html
+from dash import dcc
 
-# Load data
-base = pd.read_excel('Termo\dicionariousp.xlsx', names=['dic'])
 
-# Preprocess data
-base = base[base['dic'].str.len() == 5]
-base['dic'] = base['dic'].str.lower()
+base = pd.read_excel('Termo\dicionariousp.xlsx', names=['dic'])  # Loading the database (dictionary)
 
-# Split words into letters
-columns = ['1P', '2P', '3P', '4P', '5P']
-numbers = list(range(5))
+base = base[base['dic'].str.len() == 5]  # Filtering to only select the words with 5 letter lenght
+base['dic'] = base['dic'].str.lower()  # Transforming all letters to be lowercase
+
+columns = ['1P', '2P', '3P', '4P', '5P']  # Listing the new columns.
+numbers = list(range(5))  # Listing the positions of the letter, so "0" is the First position, "1" is the second, and so on.
+
 for column, number in zip(columns, numbers):
-    base[column] = base['dic'].str[number]
+    base[column] = base['dic'].str[number]  #This loop essentially will create the 5 columns listed in 'columns' and split the word in 5 letters, so 1P column will have the letter of the word in the first position.
 
-# Count letter occurrences
-letras = ['a', 'b', ..., 'z']
+letras = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o',
+          'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'] #Listing all the letters of the alphabet
+
 for letra in letras:
-    base[letra] = base['dic'].str.contains(letra, regex=False)
-    base[letra] = sum(base[letra])
+    base[letra] = base['dic'].str.contains(letra, regex=False)  #This loop will create a column with the corresponding letter, and return a True or False if the word contains the same letter.
+    base[letra] = sum(base[letra])  #Will sum all the values in the column. True = 1 False = 0. This will repeat the sum value for every row.
 
-# Prepare data for analysis
-posicao = pd.DataFrame()
-new_columns = []
+posicao = pd.DataFrame()  #Creating a new dataframe to extract the count on every position of the word.
+
+new_columns = []  #Creating a empty list for the loop
 for column in columns:
-    new_columns.append(column + 'Letra')
-    posicao[column] = pd.Series(base[column].value_counts().index.tolist())
+    new_columns.append(column + 'Letra')  #Will just create the same 5 columns in 'columns', but with 'Letter' together. This will be used to store the index of 'value_counts' function.
 
-# Create analysis DataFrame
+for n_column, column in zip(new_columns, columns):
+    posicao[n_column] = pd.Series(base[column].value_counts().index.tolist())  # This loop will create the 5 new columns listed in 'new_columns' and store the index previoulsy commented.
+
+for coluna in columns:
+    posicao[coluna] = pd.Series(base[coluna].value_counts().tolist())  # This loop will create the columns with the count from 'value_counts'.
+
+
+first = pd.DataFrame()
+first['1PLetra'] = letras
+first = pd.merge(first, posicao[['1PLetra', '1P']], on='1PLetra', how='left')
+first = first.fillna(0)
+
+second = pd.DataFrame()
+second['2PLetra'] = letras
+second = pd.merge(second, posicao[['2PLetra', '2P']], on='2PLetra', how='left')
+second = second.fillna(0)
+
+third = pd.DataFrame()
+third['3PLetra'] = letras
+third = pd.merge(third, posicao[['3PLetra', '3P']], on='3PLetra', how='left')
+third = third.fillna(0)
+
+fourth = pd.DataFrame()
+fourth['4PLetra'] = letras
+fourth = pd.merge(fourth, posicao[['4PLetra', '4P']], on='4PLetra', how='left')
+fourth = fourth.fillna(0)
+
+fiveth = pd.DataFrame()
+fiveth['5PLetra'] = letras
+fiveth = pd.merge(fiveth, posicao[['5PLetra', '5P']], on='5PLetra', how='left')
+fiveth = fiveth.fillna(0)
+
+posicao_new = pd.DataFrame()
+posicao_new = pd.concat([first, second, third, fourth, fiveth], axis=1)
+
+columns_to_drop = ['2PLetra', '3PLetra', '4PLetra', '5PLetra']
+posicao_new = posicao_new.drop(columns_to_drop, axis=1)
+
+posicao_new = posicao_new.rename(columns={'1PLetra': 'Letra'})
+posicao_new = posicao_new.sort_values(by='Letra', ascending=False)
+
 del base['dic']
-base.drop(columns, inplace=True, axis=1)
+base.drop(columns,inplace=True, axis=1)
 base = base.head(1)
+
 pivot = {'pivot':['pivot']}
 analise = pd.DataFrame(pivot)
 analise = pd.concat([base, analise])
@@ -42,9 +84,12 @@ del analise['pivot']
 analise.dropna(inplace=True)
 analise = analise.sort_values('value', ascending=False)
 
-# Visualization
+
+#################################################
+
 colorscales = px.colors.named_colorscales()
-app = Dash(__name__)
+app = dash.Dash(__name__)
+
 fig = px.bar(analise.sort_values(by="value", ascending=False),
              x="variable",
              y="value",
@@ -56,13 +101,35 @@ fig.update_traces(texttemplate='%{text:.2s}', textposition='inside')
 
 fig.update_layout(
     title="Análise",
-    xaxis_title="Variável",
-    yaxis_title="Valor",
-    font=dict(
-        family="Courier New, monospace",
-        size=14,
-        color="black"
-    )
+    xaxis_title="Letra",
+    yaxis_title="Soma",
 )
 
-fig.show()
+
+
+# Creating the heatmap
+fig2 = go.Figure(go.Heatmap(
+    z=posicao_new.iloc[:, 1:],
+    x=posicao_new.columns[1:],
+    y=posicao_new['Letra'],
+    colorscale="Viridis",
+    colorbar=dict(title='Frequência'),
+))
+
+# Ajusting the layout
+fig2.update_layout(title='Mapa de Calor',
+                   xaxis=dict(title='Posição', showgrid=True),
+                   yaxis=dict(title='Letra', showgrid=True),
+                   height=800, 
+                   margin=dict(l=50, r=50, b=100, t=100),
+                   )
+
+app = dash.Dash(__name__)
+
+app.layout = html.Div([
+    dcc.Graph(figure=fig),
+    dcc.Graph(figure=fig2)
+])
+
+if __name__ == "__main__":
+    app.run_server(debug=True)
