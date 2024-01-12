@@ -35,7 +35,7 @@ The project consists of a Python script that uses several libraries, including P
 
 2. Execute the script using a Python interpreter:
 
-   ``` python Termo.py ```
+``` python Termo.py ```
    
 4. Open a web browser and go to http://127.0.0.1:8050/ to view the Dash web application.
 
