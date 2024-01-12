@@ -38,7 +38,7 @@ The project consists of a Python script that uses several libraries, including P
 
 ``` python Termo.py ```
    
-4. Open a web browser and go to http://127.0.0.1:8050/ to view the Dash web application.
+3. Open a web browser and go to http://127.0.0.1:8050/ to view the Dash web application.
 
 ## Additional Note:
 The dictionary used in this project was provided by the Institute of Mathematics and Statistics (IME) at the University of São Paulo (USP).
