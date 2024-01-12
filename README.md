@@ -8,7 +8,8 @@ The project consists of a Python script that uses several libraries, including P
 ## Files
 - dicionariousp.xlsx: This Excel file contains a list of Portuguese words.
 ## Code Explanation
-1. Loading and Preprocessing Data: Reads the Excel file 'dicionariousp.xlsx' into a Pandas DataFrame, filtering words to have a length of 5 characters and converting all letters to lowercase.
+1. Loading and Preprocessing Data:
+- Reads the Excel file 'dicionariousp.xlsx' into a Pandas DataFrame, filtering words to have a length of 5 characters and converting all letters to lowercase.
 
 2. Data Analysis:
 - Creates five new columns ('1P' to '5P') to represent each position of the five-letter words.
